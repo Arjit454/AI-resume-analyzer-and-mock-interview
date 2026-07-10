@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Question {{ question_number }} — CareerStack{% endblock %}
+{% block content %}
+
+<section class="interview-section">
+
+  <div class="interview-progress">
+    <div class="interview-progress-top">
+      <span>Question {{ question_number }} of {{ session.questions_total }}</span>
+      <span class="tag {{ 'tag-good' if current_q.type == 'hr' else 'tag-warn' }}">
+        {{ session.mode | title }} &middot; {{ session.difficulty | title }}
+      </span>
+    </div>
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" style="width: {{ (question_number - 1) / session.questions_total * 100 }}%"></div>
+    </div>
+  </div>
+
+  <div class="interview-card">
+    <p class="eyebrow">{{ "HR question" if current_q.type == "hr" else "Technical question" }}</p>
+    <h2 class="interview-question">{{ current_q.question }}</h2>
+
+    <form method="POST" action="{{ url_for('interview.answer', session_id=session.id) }}" id="answerForm">
+      <textarea name="answer" rows="7" placeholder="Type your answer here..." required autofocus></textarea>
+      <div class="interview-form-footer">
+        <span class="word-count" id="wordCount">0 words</span>
+        <button type="submit" class="btn btn-primary btn-lg" id="submitAnswer">
+          {{ "Finish interview" if question_number == session.questions_total else "Next question" }}
+        </button>
+      </div>
+    </form>
+  </div>
+
+</section>
+
+{% endblock %}
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/interview.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+{% block title %}{{ resume.filename }} — CareerStack{% endblock %}
+{% block content %}
+
+<section class="detail-section">
+  <div class="detail-head">
+    <div>
+      <p class="eyebrow">Resume analysis</p>
+      <h1>{{ resume.filename }}</h1>
+      <p class="hero-sub" style="margin: 6px 0 0;">Uploaded {{ resume.created_at.strftime('%b %d, %Y') }}</p>
+    </div>
+    <a href="{{ url_for('resume.upload_page') }}" class="btn btn-outline">Upload another</a>
+  </div>
+
+  {% set ai_missing = resume.is_analyzed and not resume.career_advice %}
+  {% if not resume.is_analyzed or ai_missing %}
+  <div class="analyze-cta" id="analyzeCta">
+    <div class="dash-empty-icon">AI</div>
+    {% if ai_missing %}
+      <h2>ATS score is ready — AI analysis didn't run</h2>
+      <p>Your transparent ATS score below is up to date. Add a GROQ_API_KEY to your .env file, then retry to get strengths, weaknesses, and career advice.</p>
+      <button type="button" class="btn btn-primary btn-lg" id="analyzeBtn" data-resume-id="{{ resume.id }}">
+        Retry AI analysis
+      </button>
+    {% else %}
+      <h2>Ready to analyze this resume</h2>
+      <p>We'll calculate a transparent ATS score and send your resume to the AI for strengths, weaknesses, and career advice.</p>
+      <button type="button" class="btn btn-primary btn-lg" id="analyzeBtn" data-resume-id="{{ resume.id }}">
+        Analyze resume
+      </button>
+    {% endif %}
+    <p class="analyze-status" id="analyzeStatus"></p>
+  </div>
+  {% endif %}
+
+  <div class="detail-grid">
+
+    <div class="dash-card">
+      <h3>Contact info detected</h3>
+      <div class="contact-rows">
+        <div class="contact-row"><span>Name</span><strong>{{ resume.candidate_name or "Not detected" }}</strong></div>
+        <div class="contact-row"><span>Email</span><strong>{{ resume.candidate_email or "Not detected" }}</strong></div>
+        <div class="contact-row"><span>Phone</span><strong>{{ resume.candidate_phone or "Not detected" }}</strong></div>
+      </div>
+    </div>
+
+    <div class="dash-card">
+      <h3>Skills detected ({{ resume.skills_list() | length }})</h3>
+      {% if resume.skills_list() %}
+        <div class="skill-tags">
+          {% for skill in resume.skills_list() %}
+            <span class="tag tag-good">{{ skill }}</span>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="dash-card-sub">No recognized skills found — try adding a dedicated "Skills" section.</p>
+      {% endif %}
+    </div>
+
+    <div class="dash-card dash-card-wide">
+      <h3>Education</h3>
+      <p class="section-text">{{ resume.education or "No education section detected." }}</p>
+    </div>
+
+    <div class="dash-card dash-card-wide">
+      <h3>Experience</h3>
+      <p class="section-text">{{ resume.experience or "No experience section detected." }}</p>
+    </div>
+
+    <div class="dash-card dash-card-wide">
+      <h3>Projects</h3>
+      <p class="section-text">{{ resume.projects or "No projects section detected." }}</p>
+    </div>
+
+    <div class="dash-card dash-card-wide">
+      <h3>Certifications</h3>
+      <p class="section-text">{{ resume.certifications or "No certifications section detected." }}</p>
+    </div>
+
+  </div>
+
+  {% if resume.is_analyzed %}
+  <div class="analysis-results" id="analysisResults">
+
+    <div class="section-head" style="margin: 60px 0 36px;">
+      <p class="eyebrow">ATS score breakdown</p>
+      <h2 style="font-size:1.5rem;">{{ resume.ats_score }}/100 — here's exactly why</h2>
+    </div>
+
+    <div class="ats-breakdown-grid">
+      {% set labels = {
+        "contact_information": "Contact information",
+        "education": "Education",
+        "experience": "Experience",
+        "projects": "Projects",
+        "skills": "Skills",
+        "formatting": "Formatting",
+        "keywords": "Keywords",
+        "length": "Length"
+      } %}
+      {% for key, label in labels.items() %}
+        {% set item = resume.ats_breakdown_dict().get(key, {"score": 0, "max": 10}) %}
+        <div class="ats-row">
+          <div class="ats-row-top">
+            <span>{{ label }}</span>
+            <span class="ats-row-score">{{ item.score }}/{{ item.max }}</span>
+          </div>
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" style="width: {{ (item.score / item.max * 100) if item.max else 0 }}%"></div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="section-head" style="margin: 70px 0 36px;">
+      <p class="eyebrow">AI analysis</p>
+      <h2 style="font-size:1.5rem;">What the AI found</h2>
+    </div>
+
+    <div class="dash-grid">
+      <div class="dash-card">
+        <h3>Strengths</h3>
+        {% if resume.strengths_list() %}
+          <ul class="bullet-list bullet-good">
+            {% for item in resume.strengths_list() %}<li>{{ item }}</li>{% endfor %}
+          </ul>
+        {% else %}<p class="dash-card-sub">Not available.</p>{% endif %}
+      </div>
+
+      <div class="dash-card">
+        <h3>Weaknesses</h3>
+        {% if resume.weaknesses_list() %}
+          <ul class="bullet-list bullet-warn">
+            {% for item in resume.weaknesses_list() %}<li>{{ item }}</li>{% endfor %}
+          </ul>
+        {% else %}<p class="dash-card-sub">Not available.</p>{% endif %}
+      </div>
+
+      <div class="dash-card">
+        <h3>Grammar suggestions</h3>
+        {% if resume.grammar_suggestions_list() %}
+          <ul class="bullet-list">
+            {% for item in resume.grammar_suggestions_list() %}<li>{{ item }}</li>{% endfor %}
+          </ul>
+        {% else %}<p class="dash-card-sub">No issues found.</p>{% endif %}
+      </div>
+
+      <div class="dash-card">
+        <h3>Formatting suggestions</h3>
+        {% if resume.formatting_suggestions_list() %}
+          <ul class="bullet-list">
+            {% for item in resume.formatting_suggestions_list() %}<li>{{ item }}</li>{% endfor %}
+          </ul>
+        {% else %}<p class="dash-card-sub">No issues found.</p>{% endif %}
+      </div>
+
+      <div class="dash-card">
+        <h3>Missing skills</h3>
+        {% if resume.missing_skills_list() %}
+          <div class="skill-tags">
+            {% for skill in resume.missing_skills_list() %}<span class="tag tag-warn">{{ skill }}</span>{% endfor %}
+          </div>
+        {% else %}<p class="dash-card-sub">None flagged.</p>{% endif %}
+      </div>
+
+      <div class="dash-card">
+        <h3>Recommended technologies</h3>
+        {% if resume.recommended_technologies_list() %}
+          <div class="skill-tags">
+            {% for tech in resume.recommended_technologies_list() %}<span class="tag tag-good">{{ tech }}</span>{% endfor %}
+          </div>
+        {% else %}<p class="dash-card-sub">None flagged.</p>{% endif %}
+      </div>
+
+      <div class="dash-card">
+        <h3>Best-fit job role</h3>
+        <p class="best-role">{{ resume.best_job_role or "Not determined" }}</p>
+      </div>
+
+      <div class="dash-card dash-card-wide">
+        <h3>Career advice</h3>
+        <p class="section-text">{{ resume.career_advice or "Not available." }}</p>
+      </div>
+
+      <div class="dash-card dash-card-wide">
+        <h3>8-week learning path</h3>
+        {% if resume.learning_path_list() %}
+          <ol class="learning-path">
+            {% for step in resume.learning_path_list() %}<li>{{ step }}</li>{% endfor %}
+          </ol>
+        {% else %}<p class="dash-card-sub">Not available.</p>{% endif %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="detail-next">
+    <a href="{{ url_for('dashboard.index') }}" class="btn btn-primary">Back to dashboard</a>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/analysis.js') }}"></script>
+{% endblock %}

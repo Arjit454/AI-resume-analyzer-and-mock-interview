@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="hero" id="hero">
+  <div class="hero-blob blob-1" data-speed="0.2"></div>
+  <div class="hero-blob blob-2" data-speed="0.35"></div>
+
+  <div class="hero-inner">
+    <div class="hero-text">
+      <p class="eyebrow">Resume analysis &middot; ATS scoring &middot; mock interviews</p>
+      <h1>
+        Find out why your resume<br>
+        keeps getting <span class="highlight">rejected</span>.
+      </h1>
+      <p class="hero-sub">
+        Upload your resume, get a real ATS score, close your skill gaps,
+        and practice interviews with an AI that actually pushes back —
+        before a recruiter ever sees it.
+      </p>
+      <div class="hero-cta">
+        <a href="{{ url_for('auth.signup') }}" class="btn btn-primary btn-lg">Get started free</a>
+        <a href="#" class="btn btn-outline btn-lg" id="watchDemo">
+          <span class="play-icon">&#9654;</span> Watch demo
+        </a>
+      </div>
+      <div class="hero-trust">
+        <span>Trusted by students from</span>
+        <div class="trust-logos">
+          <span>NIT</span><span>IIT</span><span>VIT</span><span>BITS</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="stamp-card" id="tiltCard">
+        <div class="stamp-glow"></div>
+        <div class="stamp-top">
+          <span class="stamp-label">RESUME REPORT</span>
+          <span class="stamp-file">resume_final_v3.pdf</span>
+        </div>
+
+        <div class="stamp-score">
+          <svg viewBox="0 0 120 120" class="score-ring">
+            <circle cx="60" cy="60" r="52" class="ring-track"/>
+            <circle cx="60" cy="60" r="52" class="ring-fill"/>
+          </svg>
+          <div class="score-number">
+            <span class="score-value">87</span>
+            <span class="score-unit">/100</span>
+          </div>
+        </div>
+
+        <div class="stamp-rows">
+          <div class="stamp-row"><span>ATS Score</span><span class="tag tag-good">87</span></div>
+          <div class="stamp-row"><span>Grammar</span><span class="tag tag-good">Clean</span></div>
+          <div class="stamp-row"><span>Missing skill</span><span class="tag tag-warn">Docker</span></div>
+        </div>
+
+        <div class="stamp-seal">APPROVED FOR SUBMISSION</div>
+      </div>
+
+      <div class="float-icon icon-1">JS</div>
+      <div class="float-icon icon-2">PY</div>
+      <div class="float-icon icon-3">SQL</div>
+    </div>
+  </div>
+
+  <div class="scroll-cue">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<section class="section-stats" id="stats">
+  <div class="stats-inner">
+    <div class="stat-item">
+      <span class="stat-number" data-target="42000">0</span>
+      <span class="stat-label">Resumes analyzed</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-number" data-target="118000">0</span>
+      <span class="stat-label">Mock interview answers scored</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-number" data-target="31">0</span>
+      <span class="stat-label">Average ATS score improvement</span>
+      <span class="stat-suffix">%</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-number" data-target="4.8">0</span>
+      <span class="stat-label">Average rating from users</span>
+    </div>
+  </div>
+</section>
+
+<section class="section-features" id="features">
+  <div class="section-head">
+    <p class="eyebrow">What's inside</p>
+    <h2>Everything between "resume ready" and "offer accepted"</h2>
+  </div>
+
+  <div class="feature-grid">
+    <div class="feature-card tilt-card">
+      <div class="feature-icon">01</div>
+      <h3>AI Resume Analysis</h3>
+      <p>Strengths, weaknesses, grammar and formatting fixes, straight from your actual resume text — not a generic checklist.</p>
+    </div>
+    <div class="feature-card tilt-card">
+      <div class="feature-icon">02</div>
+      <h3>ATS Score Engine</h3>
+      <p>A transparent scoring model across contact info, keywords, structure and length, so you know exactly what's costing you points.</p>
+    </div>
+    <div class="feature-card tilt-card">
+      <div class="feature-icon">03</div>
+      <h3>Skill Gap Analyzer</h3>
+      <p>Pick a target role and see exactly which skills you're missing, ranked by priority and difficulty to learn.</p>
+    </div>
+    <div class="feature-card tilt-card">
+      <div class="feature-icon">04</div>
+      <h3>AI Mock Interviews</h3>
+      <p>HR, technical, or mixed rounds at three difficulty levels. Every answer scored on clarity, confidence and substance.</p>
+    </div>
+    <div class="feature-card tilt-card">
+      <div class="feature-icon">05</div>
+      <h3>Career Recommendations</h3>
+      <p>Roles that actually fit your skillset, with a plain-language explanation of why each one made the list.</p>
+    </div>
+    <div class="feature-card tilt-card">
+      <div class="feature-icon">06</div>
+      <h3>Learning Roadmap</h3>
+      <p>An 8-week plan built from your gaps, not a generic syllabus — so you always know what to study next.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section-how" id="how-it-works">
+  <div class="section-head">
+    <p class="eyebrow">Process</p>
+    <h2>From upload to offer, in four steps</h2>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-index">01</div>
+      <h3>Upload your resume</h3>
+      <p>Drop in a PDF or DOCX. We parse your contact info, education, skills, projects and experience automatically.</p>
+    </div>
+    <div class="step">
+      <div class="step-index">02</div>
+      <h3>Get your ATS score</h3>
+      <p>See a full breakdown across formatting, keywords and structure, with concrete fixes for anything that's dragging your score down.</p>
+    </div>
+    <div class="step">
+      <div class="step-index">03</div>
+      <h3>Close your skill gaps</h3>
+      <p>Choose a target role, see what you're missing, and get a prioritized roadmap to close the gap.</p>
+    </div>
+    <div class="step">
+      <div class="step-index">04</div>
+      <h3>Practice the interview</h3>
+      <p>Run a full mock interview with an AI interviewer and get scored on the things that actually matter to recruiters.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section-testimonials" id="testimonials">
+  <div class="section-head">
+    <p class="eyebrow">From students</p>
+    <h2>People who fixed their resume before it cost them an interview</h2>
+  </div>
+
+  <div class="testimonial-track">
+    <div class="testimonial-card">
+      <p>"My ATS score was 54. Three fixes later it was 89, and I actually started getting callbacks."</p>
+      <div class="testimonial-author">
+        <span class="avatar">RS</span>
+        <div>
+          <strong>Riya Sharma</strong>
+          <span>Final year, CSE</span>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card">
+      <p>"The mock interview roasted my rambling answers harder than my actual interviewer did. Good practice."</p>
+      <div class="testimonial-author">
+        <span class="avatar">AK</span>
+        <div>
+          <strong>Arjun Kumar</strong>
+          <span>Pre-final year, IT</span>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card">
+      <p>"Found out I was missing Docker and CI/CD for the role I wanted. Fixed it in three weeks with the roadmap."</p>
+      <div class="testimonial-author">
+        <span class="avatar">MP</span>
+        <div>
+          <strong>Meera Patel</strong>
+          <span>Final year, AI &amp; DS</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-faq" id="faq">
+  <div class="section-head">
+    <p class="eyebrow">Questions</p>
+    <h2>Before you ask</h2>
+  </div>
+
+  <div class="faq-list">
+    <details class="faq-item" open>
+      <summary>Is my resume data stored anywhere?</summary>
+      <p>Your resume is stored only to power your dashboard history. You can delete your account and all data from your profile settings at any time.</p>
+    </details>
+    <details class="faq-item">
+      <summary>What file formats can I upload?</summary>
+      <p>PDF and DOCX, up to 5MB. We parse contact info, education, skills, projects, experience and certifications from either format.</p>
+    </details>
+    <details class="faq-item">
+      <summary>How is the ATS score calculated?</summary>
+      <p>Across contact information, education, experience, projects, skills, formatting, keyword match and length — each weighted and combined into a score out of 100.</p>
+    </details>
+    <details class="faq-item">
+      <summary>Do I need to pay for this?</summary>
+      <p>No. This runs entirely on free-tier tools: Flask, SQLite and the Groq API.</p>
+    </details>
+  </div>
+</section>
+
+<section class="section-contact" id="contact">
+  <div class="contact-card">
+    <div>
+      <p class="eyebrow">Get in touch</p>
+      <h2>Have feedback, or found a bug?</h2>
+      <p class="hero-sub">Tell us what broke, or what you wish existed. This is a project we're still actively building.</p>
+    </div>
+    <form class="contact-form">
+      <input type="text" placeholder="Your name" required>
+      <input type="email" placeholder="Your email" required>
+      <textarea rows="4" placeholder="Your message" required></textarea>
+      <button type="submit" class="btn btn-primary">Send message</button>
+    </form>
+  </div>
+</section>
+
+{% endblock %}

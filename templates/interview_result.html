@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Interview results — CareerStack{% endblock %}
+{% block content %}
+
+<section class="detail-section">
+  <div class="detail-head">
+    <div>
+      <p class="eyebrow">Interview complete</p>
+      <h1>{{ session.mode | title }} round &middot; {{ session.difficulty | title }}</h1>
+      <p class="hero-sub" style="margin: 6px 0 0;">{{ session.created_at.strftime('%b %d, %Y') }}</p>
+    </div>
+    <a href="{{ url_for('interview.setup') }}" class="btn btn-outline">New interview</a>
+  </div>
+
+  <div class="gap-coverage-card" style="margin-bottom: 32px;">
+    <div class="mini-ring-wrap" style="margin: 0;">
+      <svg viewBox="0 0 100 100" class="mini-ring">
+        <circle cx="50" cy="50" r="42" class="ring-track"/>
+        <circle cx="50" cy="50" r="42" class="ring-fill" style="stroke-dashoffset: {{ 264 - (264 * session.overall_score / 100) }}"/>
+      </svg>
+      <span class="mini-ring-value">{{ session.overall_score }}</span>
+    </div>
+    <div>
+      <h3>Overall score</h3>
+      <p class="dash-card-sub">Averaged across all {{ session.questions_total }} answers</p>
+    </div>
+  </div>
+
+  <div class="score-cards" style="grid-template-columns: repeat(5, 1fr); margin-bottom: 40px;">
+    {% set cats = [
+      ("Grammar", session.grammar_score),
+      ("Confidence", session.confidence_score),
+      ("Technical", session.technical_score),
+      ("Communication", session.communication_score),
+      ("Problem solving", session.problem_solving_score),
+    ] %}
+    {% for label, value in cats %}
+    <div class="score-card">
+      <span class="score-card-label">{{ label }}</span>
+      <div class="mini-ring-wrap" style="width:80px; height:80px;">
+        <svg viewBox="0 0 100 100" class="mini-ring" style="width:80px; height:80px;">
+          <circle cx="50" cy="50" r="42" class="ring-track"/>
+          <circle cx="50" cy="50" r="42" class="ring-fill" style="stroke-dashoffset: {{ 264 - (264 * value / 100) }}"/>
+        </svg>
+        <span class="mini-ring-value" style="font-size:1rem;">{{ value }}</span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="section-head" style="margin: 50px 0 30px;">
+    <p class="eyebrow">Question by question</p>
+    <h2 style="font-size:1.4rem;">Your answers and feedback</h2>
+  </div>
+
+  <div class="qa-list">
+    {% for a in session.answers %}
+    <div class="dash-card qa-card">
+      <div class="qa-top">
+        <span class="tag {{ 'tag-good' if a.question_type == 'hr' else 'tag-warn' }}">
+          {{ "HR" if a.question_type == "hr" else "Technical" }}
+        </span>
+        <span class="qa-score">{{ a.overall_score }}/100</span>
+      </div>
+      <h3 class="qa-question">{{ a.question_text }}</h3>
+      <p class="section-text qa-answer">{{ a.answer_text }}</p>
+      <p class="qa-feedback">{{ a.feedback }}</p>
+      <div class="qa-mini-scores">
+        <span>Grammar {{ a.grammar_score }}</span>
+        <span>Confidence {{ a.confidence_score }}</span>
+        <span>Technical {{ a.technical_score }}</span>
+        <span>Communication {{ a.communication_score }}</span>
+        <span>Problem solving {{ a.problem_solving_score }}</span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="detail-next">
+    <a href="{{ url_for('dashboard.index') }}" class="btn btn-primary">Back to dashboard</a>
+  </div>
+</section>
+
+{% endblock %}

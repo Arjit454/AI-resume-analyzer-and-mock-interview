@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — CareerStack{% endblock %}
+
+{% block content %}
+<section class="dash">
+
+  <div class="dash-head">
+    <div>
+      <p class="eyebrow">Dashboard</p>
+      <h1>Welcome back, {{ user.name.split(' ')[0] }}.</h1>
+    </div>
+    {% if has_data %}
+    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+      <a href="{{ url_for('resume.upload_page') }}" class="btn btn-primary">Upload resume</a>
+      <a href="{{ url_for('career.skill_gap') }}" class="btn btn-outline">Skill gap analyzer</a>
+      <a href="{{ url_for('career.job_recommendations') }}" class="btn btn-outline">Job recommendations</a>
+      <a href="{{ url_for('interview.setup') }}" class="btn btn-outline">Mock interview</a>
+      <a href="{{ url_for('learning.index') }}" class="btn btn-outline">Learning roadmap</a>
+      <a href="{{ url_for('report.index') }}" class="btn btn-outline">Final report</a>
+      <form method="POST" action="{{ url_for('dashboard.seed_demo') }}">
+        <button type="submit" class="btn btn-outline">Add another sample round</button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+
+  {% if not has_data %}
+  <div class="dash-empty">
+    <div class="dash-empty-icon">CS</div>
+    <h2>Your dashboard is empty for now</h2>
+    <p>Upload a resume to get your first ATS score, or load sample data to see how the full dashboard looks.</p>
+    <div class="dash-empty-actions">
+      <a href="{{ url_for('resume.upload_page') }}" class="btn btn-outline">Upload your resume</a>
+      <form method="POST" action="{{ url_for('dashboard.seed_demo') }}">
+        <button type="submit" class="btn btn-primary">Load demo data</button>
+      </form>
+    </div>
+  </div>
+
+  {% else %}
+
+  <div class="score-cards">
+    <div class="score-card tilt-card">
+      <span class="score-card-label">Resume Score</span>
+      <div class="mini-ring-wrap">
+        <svg viewBox="0 0 100 100" class="mini-ring">
+          <circle cx="50" cy="50" r="42" class="ring-track"/>
+          <circle cx="50" cy="50" r="42" class="ring-fill" style="stroke-dashoffset: {{ 264 - (264 * (resume_score or 0) / 100) }}"/>
+        </svg>
+        <span class="mini-ring-value">{{ resume_score if resume_score is not none else '—' }}</span>
+      </div>
+      <span class="score-card-sub">out of 100</span>
+    </div>
+
+    <div class="score-card tilt-card">
+      <span class="score-card-label">ATS Score</span>
+      <div class="mini-ring-wrap">
+        <svg viewBox="0 0 100 100" class="mini-ring">
+          <circle cx="50" cy="50" r="42" class="ring-track"/>
+          <circle cx="50" cy="50" r="42" class="ring-fill ring-amber" style="stroke-dashoffset: {{ 264 - (264 * (ats_score or 0) / 100) }}"/>
+        </svg>
+        <span class="mini-ring-value">{{ ats_score if ats_score is not none else '—' }}</span>
+      </div>
+      <span class="score-card-sub">out of 100</span>
+    </div>
+
+    <div class="score-card tilt-card">
+      <span class="score-card-label">Interview Score</span>
+      <div class="mini-ring-wrap">
+        <svg viewBox="0 0 100 100" class="mini-ring">
+          <circle cx="50" cy="50" r="42" class="ring-track"/>
+          <circle cx="50" cy="50" r="42" class="ring-fill ring-coral" style="stroke-dashoffset: {{ 264 - (264 * (interview_score or 0) / 100) }}"/>
+        </svg>
+        <span class="mini-ring-value">{{ interview_score if interview_score is not none else '—' }}</span>
+      </div>
+      <span class="score-card-sub">last mock round</span>
+    </div>
+  </div>
+
+  <div class="dash-grid">
+
+    <div class="dash-card">
+      <h3>Uploaded resume</h3>
+      {% if latest_resume %}
+        <div class="resume-file-row">
+          <span class="file-chip">{{ latest_resume.filename }}</span>
+          <span class="file-date">{{ latest_resume.created_at.strftime('%b %d, %Y') }}</span>
+        </div>
+        <p class="dash-card-sub">Target role: {{ latest_resume.target_role or "Not set" }}</p>
+        <a href="{{ url_for('resume.resume_detail', resume_id=latest_resume.id) }}" class="inline-link" style="font-size:0.85rem;">View full analysis &rarr;</a>
+      {% else %}
+        <p class="dash-card-sub">No resume uploaded yet.</p>
+      {% endif %}
+    </div>
+
+    <div class="dash-card">
+      <h3>Recommended skills to learn</h3>
+      {% if missing_skills %}
+        <div class="skill-tags">
+          {% for skill in missing_skills %}
+            <span class="tag tag-warn">{{ skill }}</span>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="dash-card-sub">No skill gaps detected yet — upload a resume and pick a target role.</p>
+      {% endif %}
+    </div>
+
+    <div class="dash-card">
+      <h3>Learning progress</h3>
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" style="width: {{ learning_progress }}%"></div>
+      </div>
+      <p class="dash-card-sub">{{ learning_progress }}% of target skills covered</p>
+    </div>
+
+    <div class="dash-card dash-card-wide">
+      <h3>Recent activity</h3>
+      <ul class="activity-list">
+        {% for item in activity %}
+          <li class="activity-item">
+            <span class="activity-icon activity-{{ item.icon }}"></span>
+            <div class="activity-text">
+              <strong>{{ item.action }}</strong>
+              {% if item.detail %}<span>{{ item.detail }}</span>{% endif %}
+            </div>
+            <span class="activity-time">{{ item.created_at.strftime('%b %d') }}</span>
+          </li>
+        {% else %}
+          <li class="activity-item"><span class="activity-text">No activity yet.</span></li>
+        {% endfor %}
+      </ul>
+    </div>
+
+  </div>
+
+  <div class="chart-grid">
+    <div class="dash-card">
+      <h3>ATS score trend</h3>
+      <div class="chart-container">
+        <canvas id="atsTrendChart"></canvas>
+      </div>
+    </div>
+    <div class="dash-card">
+      <h3>Interview score trend</h3>
+      <div class="chart-container">
+        <canvas id="interviewTrendChart"></canvas>
+      </div>
+    </div>
+    <div class="dash-card dash-card-wide">
+      <h3>Skill distribution across resumes</h3>
+      <div class="chart-container chart-container-wide">
+        <canvas id="skillChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  {% endif %}
+</section>
+{% endblock %}
+
+{% block extra_js %}
+{% if has_data %}
+<script src="{{ url_for('static', filename='js/vendor/chart.min.js') }}"></script>
+<script>
+  const rootStyles = getComputedStyle(document.documentElement);
+  const teal = rootStyles.getPropertyValue('--teal').trim() || '#17c9a8';
+  const amber = rootStyles.getPropertyValue('--amber').trim() || '#f2a93b';
+  const coral = rootStyles.getPropertyValue('--coral').trim() || '#ef6a5a';
+  const textDim = rootStyles.getPropertyValue('--text-dim').trim() || '#9aa4b2';
+  const inkSoft = rootStyles.getPropertyValue('--ink-soft').trim() || '#161b22';
+  const line = rootStyles.getPropertyValue('--line').trim() || 'rgba(255,255,255,0.09)';
+
+  Chart.defaults.font.family = "Inter, sans-serif";
+  Chart.defaults.font.size = 12;
+  Chart.defaults.color = textDim;
+
+  function hexToRgba(hex, alpha) {
+    const h = hex.replace('#', '');
+    const bigint = parseInt(h.length === 3 ? h.split('').map(c => c + c).join('') : h, 16);
+    const r = (bigint >> 16) & 255, g = (bigint >> 8) & 255, b = bigint & 255;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
+  function verticalGradient(ctx, chartArea, colorHex, topAlpha = 0.35, bottomAlpha = 0) {
+    const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+    gradient.addColorStop(0, hexToRgba(colorHex, topAlpha));
+    gradient.addColorStop(1, hexToRgba(colorHex, bottomAlpha));
+    return gradient;
+  }
+
+  const sharedTooltip = {
+    backgroundColor: inkSoft,
+    titleColor: "#eef1f6",
+    bodyColor: textDim,
+    borderColor: line,
+    borderWidth: 1,
+    padding: 12,
+    cornerRadius: 10,
+    displayColors: false,
+    titleFont: { weight: '600' },
+  };
+
+  function emptyStateNotice(canvasId, message) {
+    const canvas = document.getElementById(canvasId);
+    const ctx = canvas.getContext('2d');
+    const parent = canvas.parentElement;
+    ctx.font = "13px Inter, sans-serif";
+    ctx.fillStyle = textDim;
+    ctx.textAlign = "center";
+    ctx.fillText(message, parent.clientWidth / 2, parent.clientHeight / 2);
+  }
+
+  function lineChart(canvasId, labels, data, colorHex) {
+    if (!data.length) {
+      emptyStateNotice(canvasId, "Not enough history yet — check back after your next upload.");
+      return;
+    }
+    const singlePoint = data.length === 1;
+    new Chart(document.getElementById(canvasId), {
+      type: 'line',
+      data: {
+        labels: singlePoint ? ["", ...labels, ""] : labels,
+        datasets: [{
+          data: singlePoint ? [null, data[0], null] : data,
+          borderColor: colorHex,
+          backgroundColor: (context) => {
+            const { chart } = context;
+            const { ctx, chartArea } = chart;
+            if (!chartArea) return hexToRgba(colorHex, 0.15);
+            return verticalGradient(ctx, chartArea, colorHex);
+          },
+          fill: true,
+          tension: 0.4,
+          borderWidth: 3,
+          pointRadius: singlePoint ? 7 : 4,
+          pointHoverRadius: 8,
+          pointBackgroundColor: colorHex,
+          pointBorderColor: inkSoft,
+          pointBorderWidth: 2,
+          spanGaps: true,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 900, easing: 'easeOutQuart' },
+        plugins: { legend: { display: false }, tooltip: sharedTooltip },
+        scales: {
+          y: { beginAtZero: true, max: 100, grid: { color: line }, border: { display: false } },
+          x: { grid: { display: false }, border: { display: false } },
+        }
+      }
+    });
+  }
+
+  lineChart('atsTrendChart', {{ ats_trend_labels | tojson }}, {{ ats_trend_data | tojson }}, teal);
+  lineChart('interviewTrendChart', {{ interview_trend_labels | tojson }}, {{ interview_trend_data | tojson }}, coral);
+
+  const skillLabels = {{ skill_labels | tojson }};
+  const skillData = {{ skill_data | tojson }};
+
+  if (!skillData.length) {
+    emptyStateNotice('skillChart', "Upload a couple of resumes to see your skill spread here.");
+  } else {
+    new Chart(document.getElementById('skillChart'), {
+      type: 'bar',
+      data: {
+        labels: skillLabels,
+        datasets: [{
+          data: skillData,
+          backgroundColor: (context) => {
+            const { chart } = context;
+            const { ctx, chartArea } = chart;
+            if (!chartArea) return hexToRgba(amber, 0.8);
+            const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+            gradient.addColorStop(0, hexToRgba(amber, 0.55));
+            gradient.addColorStop(1, amber);
+            return gradient;
+          },
+          borderRadius: 8,
+          maxBarThickness: 46,
+          hoverBackgroundColor: teal,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 900, easing: 'easeOutQuart' },
+        plugins: { legend: { display: false }, tooltip: sharedTooltip },
+        scales: {
+          y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: line }, border: { display: false } },
+          x: { grid: { display: false }, border: { display: false } },
+        }
+      }
+    });
+  }
+</script>
+{% endif %}
+{% endblock %}

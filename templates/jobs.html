@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Job Recommendations — CareerStack{% endblock %}
+{% block content %}
+
+<section class="career-section">
+  <div class="section-head">
+    <p class="eyebrow">Job Recommendations</p>
+    <h2>Roles that fit your current skillset</h2>
+  </div>
+
+  {% if not resume %}
+  <div class="dash-empty">
+    <div class="dash-empty-icon">CS</div>
+    <h2>Upload a resume first</h2>
+    <p>We match your detected skills against common roles to see what fits — upload a resume to get started.</p>
+    <a href="{{ url_for('resume.upload_page') }}" class="btn btn-primary">Upload resume</a>
+  </div>
+  {% else %}
+
+  <div class="job-list">
+    {% for job in recommendations %}
+    <div class="job-card tilt-card">
+      <div class="job-card-top">
+        <div>
+          <h3>{{ job.title }}</h3>
+          <p class="dash-card-sub">{{ job.blurb }}</p>
+        </div>
+        <div class="job-match">
+          <span class="job-match-value">{{ job.match_pct }}%</span>
+          <span class="job-match-label">match</span>
+        </div>
+      </div>
+
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" style="width: {{ job.match_pct }}%"></div>
+      </div>
+
+      <div class="job-skills-row">
+        {% if job.matched %}
+          <div>
+            <span class="job-skills-label">You have</span>
+            <div class="skill-tags">
+              {% for skill in job.matched %}<span class="tag tag-good">{{ skill }}</span>{% endfor %}
+            </div>
+          </div>
+        {% endif %}
+        {% if job.missing %}
+          <div>
+            <span class="job-skills-label">Worth learning</span>
+            <div class="skill-tags">
+              {% for skill in job.missing %}<span class="tag tag-warn">{{ skill }}</span>{% endfor %}
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% endif %}
+</section>
+
+{% endblock %}

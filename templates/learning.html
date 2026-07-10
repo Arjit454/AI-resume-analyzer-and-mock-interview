@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Learning Roadmap — CareerStack{% endblock %}
+{% block content %}
+
+<section class="career-section">
+  <div class="section-head">
+    <p class="eyebrow">Learning Dashboard</p>
+    <h2>Your 8-week roadmap</h2>
+    <p class="hero-sub" style="margin: 0 auto;">
+      {% if roadmap.source == "ai" %}
+        Personalized from your last AI resume analysis.
+      {% else %}
+        A general-purpose starter plan — analyze a resume to get one built around your actual skill gaps.
+      {% endif %}
+    </p>
+  </div>
+
+  <div class="roadmap-progress-card">
+    <div class="progress-bar-track" style="margin-bottom: 10px;">
+      <div class="progress-bar-fill" id="roadmapProgressFill" style="width: {{ roadmap.progress_percent() }}%"></div>
+    </div>
+    <p class="dash-card-sub" id="roadmapProgressLabel">{{ roadmap.progress_percent() }}% complete</p>
+  </div>
+
+  <div class="roadmap-list">
+    {% for week in weeks %}
+    <label class="roadmap-week {{ 'roadmap-week-done' if week.completed else '' }}" data-week="{{ week.number }}">
+      <input type="checkbox" class="week-checkbox" {{ 'checked' if week.completed else '' }}>
+      <span class="roadmap-week-check"></span>
+      <div class="roadmap-week-body">
+        <span class="roadmap-week-number">Week {{ week.number }}</span>
+        <span class="roadmap-week-topic">{{ week.topic.split(':', 1)[1].strip() if ':' in week.topic else week.topic }}</span>
+      </div>
+    </label>
+    {% endfor %}
+  </div>
+</section>
+
+{% endblock %}
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/learning.js') }}"></script>
+{% endblock %}

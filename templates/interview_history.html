@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Interview history — CareerStack{% endblock %}
+{% block content %}
+
+<section class="career-section">
+  <div class="section-head">
+    <p class="eyebrow">History</p>
+    <h2>Your past mock interviews</h2>
+  </div>
+
+  {% if not sessions %}
+  <div class="dash-empty">
+    <div class="dash-empty-icon">CS</div>
+    <h2>No completed interviews yet</h2>
+    <p>Run your first mock interview to start building a history here.</p>
+    <a href="{{ url_for('interview.setup') }}" class="btn btn-primary">Start an interview</a>
+  </div>
+  {% else %}
+
+  <div class="job-list">
+    {% for s in sessions %}
+    <a href="{{ url_for('interview.result', session_id=s.id) }}" class="job-card tilt-card" style="display:block;">
+      <div class="job-card-top">
+        <div>
+          <h3>{{ s.mode | title }} round &middot; {{ s.difficulty | title }}</h3>
+          <p class="dash-card-sub">{{ s.created_at.strftime('%b %d, %Y') }} &middot; {{ s.questions_total }} questions</p>
+        </div>
+        <div class="job-match">
+          <span class="job-match-value">{{ s.overall_score }}</span>
+          <span class="job-match-label">score</span>
+        </div>
+      </div>
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" style="width: {{ s.overall_score }}%"></div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+
+  {% endif %}
+</section>
+
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Mock Interview — CareerStack{% endblock %}
+{% block content %}
+
+<section class="career-section">
+  <div class="section-head">
+    <p class="eyebrow">AI Mock Interview</p>
+    <h2>Choose your round</h2>
+    <p class="hero-sub" style="margin: 0 auto;">Five questions, scored on grammar, confidence, technical knowledge, communication and problem-solving.</p>
+  </div>
+
+  <form method="POST" action="{{ url_for('interview.start') }}" class="interview-setup-form" id="setupForm">
+
+    <div class="setup-group">
+      <p class="setup-label">Interview type</p>
+      <div class="option-grid">
+        <label class="option-card">
+          <input type="radio" name="mode" value="hr" checked>
+          <span class="option-title">HR Round</span>
+          <span class="option-sub">Behavioral and situational questions</span>
+        </label>
+        <label class="option-card">
+          <input type="radio" name="mode" value="technical">
+          <span class="option-title">Technical Round</span>
+          <span class="option-sub">Concepts, systems and problem-solving</span>
+        </label>
+        <label class="option-card">
+          <input type="radio" name="mode" value="mixed">
+          <span class="option-title">Mixed Round</span>
+          <span class="option-sub">A blend of both</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="setup-group">
+      <p class="setup-label">Difficulty</p>
+      <div class="option-grid option-grid-3">
+        <label class="option-card">
+          <input type="radio" name="difficulty" value="easy" checked>
+          <span class="option-title">Easy</span>
+        </label>
+        <label class="option-card">
+          <input type="radio" name="difficulty" value="medium">
+          <span class="option-title">Medium</span>
+        </label>
+        <label class="option-card">
+          <input type="radio" name="difficulty" value="hard">
+          <span class="option-title">Hard</span>
+        </label>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-lg" style="width:100%; justify-content:center;">
+      Start interview
+    </button>
+  </form>
+</section>
+
+{% endblock %}
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/interview_setup.js') }}"></script>
+{% endblock %}

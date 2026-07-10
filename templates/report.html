@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+{% block title %}Final Report — CareerStack{% endblock %}
+{% block content %}
+
+<section class="detail-section">
+  <div class="section-head">
+    <p class="eyebrow">Final Report</p>
+    <h2>Everything in one place</h2>
+  </div>
+
+  {% if not has_resume and not has_interview %}
+  <div class="dash-empty">
+    <div class="dash-empty-icon">CS</div>
+    <h2>Nothing to report on yet</h2>
+    <p>Upload and analyze a resume, or complete a mock interview, to generate your first report.</p>
+    <div class="dash-empty-actions">
+      <a href="{{ url_for('resume.upload_page') }}" class="btn btn-outline">Upload resume</a>
+      <a href="{{ url_for('interview.setup') }}" class="btn btn-primary">Start interview</a>
+    </div>
+  </div>
+  {% else %}
+
+  <div class="gap-coverage-card" style="margin-bottom: 40px;">
+    <div class="mini-ring-wrap" style="margin: 0; width:120px; height:120px;">
+      <svg viewBox="0 0 100 100" class="mini-ring" style="width:120px; height:120px;">
+        <circle cx="50" cy="50" r="42" class="ring-track"/>
+        <circle cx="50" cy="50" r="42" class="ring-fill" style="stroke-dashoffset: {{ 264 - (264 * (overall_score or 0) / 100) }}"/>
+      </svg>
+      <span class="mini-ring-value" style="font-size:1.6rem;">{{ overall_score if overall_score is not none else '—' }}</span>
+    </div>
+    <div>
+      <h3>Overall score</h3>
+      <p class="dash-card-sub">
+        {% if has_resume and has_interview %}
+          60% resume quality, 40% latest interview performance
+        {% elif has_resume %}
+          Based on your latest analyzed resume — complete a mock interview to factor that in too
+        {% else %}
+          Based on your latest mock interview — analyze a resume to factor that in too
+        {% endif %}
+      </p>
+    </div>
+  </div>
+
+  <div class="dash-grid">
+    <div class="dash-card">
+      <h3>Strengths</h3>
+      {% if strengths %}
+        <ul class="bullet-list bullet-good">
+          {% for item in strengths %}<li>{{ item }}</li>{% endfor %}
+        </ul>
+      {% else %}<p class="dash-card-sub">Not enough data yet.</p>{% endif %}
+    </div>
+
+    <div class="dash-card">
+      <h3>Weaknesses</h3>
+      {% if weaknesses %}
+        <ul class="bullet-list bullet-warn">
+          {% for item in weaknesses %}<li>{{ item }}</li>{% endfor %}
+        </ul>
+      {% else %}<p class="dash-card-sub">Not enough data yet.</p>{% endif %}
+    </div>
+
+    <div class="dash-card dash-card-wide">
+      <h3>Recommended improvements</h3>
+      <ul class="bullet-list">
+        {% for item in recommended_improvements %}<li>{{ item }}</li>{% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  {% if has_resume or has_interview %}
+  <div class="section-head" style="margin: 60px 0 30px;">
+    <p class="eyebrow">Score breakdown</p>
+    <h2 style="font-size:1.4rem;">Where the points came from</h2>
+  </div>
+  <div class="chart-grid" style="grid-template-columns: repeat(2, 1fr);">
+    {% if has_resume %}
+    <div class="dash-card">
+      <h3>Resume / ATS categories</h3>
+      <div class="chart-container">
+        <canvas id="atsChart"></canvas>
+      </div>
+    </div>
+    {% endif %}
+    {% if has_interview %}
+    <div class="dash-card">
+      <h3>Interview categories</h3>
+      <div class="chart-container">
+        <canvas id="interviewChart"></canvas>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <div class="section-head" style="margin: 60px 0 30px;">
+    <p class="eyebrow">Job suggestions</p>
+    <h2 style="font-size:1.4rem;">Roles worth targeting right now</h2>
+  </div>
+  {% if job_suggestions %}
+    <div class="job-list">
+      {% for job in job_suggestions %}
+      <div class="job-card">
+        <div class="job-card-top">
+          <div>
+            <h3>{{ job.title }}</h3>
+            <p class="dash-card-sub">{{ job.blurb }}</p>
+          </div>
+          <div class="job-match">
+            <span class="job-match-value">{{ job.match_pct }}%</span>
+            <span class="job-match-label">match</span>
+          </div>
+        </div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" style="width: {{ job.match_pct }}%"></div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="dash-card-sub">Upload a resume to get job suggestions based on your skills.</p>
+  {% endif %}
+
+  <div class="section-head" style="margin: 60px 0 30px;">
+    <p class="eyebrow">Learning plan</p>
+    <h2 style="font-size:1.4rem;">Your 8-week roadmap</h2>
+  </div>
+  <div class="dash-card">
+    {% if roadmap %}
+      <ol class="learning-path">
+        {% for item in roadmap.items() %}<li>{{ item }}</li>{% endfor %}
+      </ol>
+      <a href="{{ url_for('learning.index') }}" class="inline-link" style="display:inline-block; margin-top:16px;">Track your progress on the Learning Dashboard &rarr;</a>
+    {% else %}
+      <p class="dash-card-sub">No roadmap yet — visit the Learning Dashboard to get a starter plan.</p>
+    {% endif %}
+  </div>
+
+  {% endif %}
+</section>
+
+{% endblock %}
+{% block extra_js %}
+{% if has_resume or has_interview %}
+<script src="{{ url_for('static', filename='js/vendor/chart.min.js') }}"></script>
+<script>
+  const rootStyles = getComputedStyle(document.documentElement);
+  const teal = rootStyles.getPropertyValue('--teal').trim() || '#17c9a8';
+  const coral = rootStyles.getPropertyValue('--coral').trim() || '#ef6a5a';
+  const textDim = rootStyles.getPropertyValue('--text-dim').trim() || '#9aa4b2';
+  const inkSoft = rootStyles.getPropertyValue('--ink-soft').trim() || '#161b22';
+  const line = rootStyles.getPropertyValue('--line').trim() || 'rgba(255,255,255,0.09)';
+
+  Chart.defaults.font.family = "Inter, sans-serif";
+  Chart.defaults.font.size = 12;
+  Chart.defaults.color = textDim;
+
+  function hexToRgba(hex, alpha) {
+    const h = hex.replace('#', '');
+    const bigint = parseInt(h.length === 3 ? h.split('').map(c => c + c).join('') : h, 16);
+    const r = (bigint >> 16) & 255, g = (bigint >> 8) & 255, b = bigint & 255;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
+  const sharedTooltip = {
+    backgroundColor: inkSoft, titleColor: "#eef1f6", bodyColor: textDim,
+    borderColor: line, borderWidth: 1, padding: 12, cornerRadius: 10, displayColors: false,
+  };
+
+  function categoryBarChart(canvasId, labels, data, colorHex) {
+    new Chart(document.getElementById(canvasId), {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          data,
+          backgroundColor: (context) => {
+            const { chart } = context;
+            const { ctx, chartArea } = chart;
+            if (!chartArea) return hexToRgba(colorHex, 0.7);
+            const gradient = ctx.createLinearGradient(chartArea.left, 0, chartArea.right, 0);
+            gradient.addColorStop(0, hexToRgba(colorHex, 0.45));
+            gradient.addColorStop(1, colorHex);
+            return gradient;
+          },
+          borderRadius: 8,
+          maxBarThickness: 30,
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 900, easing: 'easeOutQuart' },
+        plugins: { legend: { display: false }, tooltip: sharedTooltip },
+        scales: {
+          x: { beginAtZero: true, max: 100, grid: { color: line }, border: { display: false } },
+          y: { grid: { display: false }, border: { display: false } },
+        }
+      }
+    });
+  }
+
+  {% if has_resume %}
+  categoryBarChart('atsChart', {{ ats_chart_labels | tojson }}, {{ ats_chart_data | tojson }}, teal);
+  {% endif %}
+
+  {% if has_interview %}
+  categoryBarChart('interviewChart', {{ interview_chart_labels | tojson }}, {{ interview_chart_data | tojson }}, coral);
+  {% endif %}
+</script>
+{% endif %}
+{% endblock %}

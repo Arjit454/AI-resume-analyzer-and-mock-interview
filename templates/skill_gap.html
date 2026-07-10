@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Skill Gap Analyzer — CareerStack{% endblock %}
+{% block content %}
+
+<section class="career-section">
+  <div class="section-head">
+    <p class="eyebrow">Skill Gap Analyzer</p>
+    <h2>Pick a target role, see what's missing</h2>
+  </div>
+
+  {% if not resume %}
+  <div class="dash-empty">
+    <div class="dash-empty-icon">CS</div>
+    <h2>Upload a resume first</h2>
+    <p>We compare your detected skills against a target role — upload a resume to get started.</p>
+    <a href="{{ url_for('resume.upload_page') }}" class="btn btn-primary">Upload resume</a>
+  </div>
+  {% else %}
+
+  <form method="POST" action="{{ url_for('career.skill_gap') }}" class="role-picker">
+    {% for role in roles %}
+      <button type="submit" name="role" value="{{ role }}"
+              class="role-card {{ 'role-card-active' if role == selected_role else '' }}">
+        {{ role }}
+      </button>
+    {% endfor %}
+  </form>
+
+  {% if result %}
+  <div class="gap-results">
+
+    <div class="gap-coverage-card">
+      <div class="mini-ring-wrap" style="margin: 0;">
+        <svg viewBox="0 0 100 100" class="mini-ring">
+          <circle cx="50" cy="50" r="42" class="ring-track"/>
+          <circle cx="50" cy="50" r="42" class="ring-fill" style="stroke-dashoffset: {{ 264 - (264 * result.coverage / 100) }}"/>
+        </svg>
+        <span class="mini-ring-value">{{ result.coverage }}%</span>
+      </div>
+      <div>
+        <h3>{{ result.role }} readiness</h3>
+        <p class="dash-card-sub">{{ result.available | length }} of {{ result.available | length + result.missing | length }} required skills covered</p>
+      </div>
+    </div>
+
+    <div class="dash-grid">
+      <div class="dash-card">
+        <h3>Skills you already have</h3>
+        {% if result.available %}
+          <div class="skill-tags">
+            {% for skill in result.available %}<span class="tag tag-good">{{ skill }}</span>{% endfor %}
+          </div>
+        {% else %}
+          <p class="dash-card-sub">None yet — every required skill for this role is currently missing.</p>
+        {% endif %}
+      </div>
+
+      <div class="dash-card dash-card-wide">
+        <h3>Missing skills, by priority</h3>
+        {% if result.missing %}
+          <div class="gap-table">
+            {% for item in result.missing %}
+            <div class="gap-row">
+              <span class="tag tag-warn gap-skill">{{ item.skill }}</span>
+              <span class="gap-badge priority-{{ item.priority | lower }}">{{ item.priority }} priority</span>
+              <span class="gap-badge difficulty-{{ item.difficulty | lower }}">{{ item.difficulty }}</span>
+              <span class="gap-course">{{ item.course }}</span>
+            </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="dash-card-sub">You've got every skill this role typically asks for. Nice.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% endif %}
+</section>
+
+{% endblock %}
